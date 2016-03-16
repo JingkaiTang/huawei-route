@@ -123,14 +123,12 @@ void write_result(const char * const filename)
 
 void release_buff(char ** const buff, const int valid_item_num)
 {
-    register int i=0;
-    for (i = 0; i < valid_item_num; i++)
+    for (int i = 0; i < valid_item_num; i++)
         free(buff[i]);
 }
 void release_buffi(int ** const buff, const int valid_item_num)
 {
-    register int i=0;
-    for (i = 0; i < valid_item_num; i++)
+    for (int i = 0; i < valid_item_num; i++)
         free(buff[i]);
 }
 
