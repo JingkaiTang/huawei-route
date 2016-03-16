@@ -7,29 +7,54 @@
 
 #define PRINT printf
 
+//节点
+typedef struct node_t
+{
+	int value;	//编号
+	int n_child;//子节点数
+	int level;  //层数
+	int parent; //父节点
+	int cost;   //到父节点的花费
+	int num;    //到父节点的边号
+	struct node_t** child;
+} NODE;
+
+//边权值
+int (*p)[600];
+p=(int (*)[600])malloc(360000*sizeof(int)); 
+//序号
+int (*n)[600];
+n=(int (*)[600])malloc(360000*sizeof(int));
+
+//源、目标点，点集，点状态集
+int s =0,d=0,v_num=0;
+int state[50],pass[50];
+//cost初始值
+int cost = 60000;
+
 
 //分割demand
 int get_demand(int s,int d,int pass[50],char *demand);
-
+//判断点集是否全部命中
+int all_hit(int v_num);
+//命中点v
+void hit(int v);
+//取消命中点v
+void dishit(int v); 
 
 //你要完成的功能总入口
 void search_route(int *topo[5000], int edge_num, char *demand)
 {
-	int (*p)[600];
-	p=(int (*)[600])malloc(360000*sizeof(int)); 
-	//PRINT("%d %d %d %d\n",topo[0][0],topo[0][1],topo[0][2],topo[0][3]);
-	register int i=0;
-	for(i=0;i<edge_num;i++){
-		p[topo[i][1]][topo[i][2]]=topo[i][3];
+	//初始化边序号/边权值矩阵
+	for(int i=0;i<edge_num;i++){
+		int x = topo[i][1], y=topo[i][2], v = topo[i][3];
+		n[x][y]=topo[i][0];
+		if(p[x][y]>v){
+			p[x][y]=v;
+		}
 	}
-	//PRINT("dmd=%s\n",demand);
-	//源、目标点，点集
-	int s =0,d=0,v_num=0;
-	int pass[50];
+
 	v_num = get_demand(s,d,pass,demand);
-	PRINT("v_num=%d\n",v_num);
-	
-	
 
 	/*
 	for(int i=0;i<20;i++){
@@ -47,14 +72,13 @@ void search_route(int *topo[5000], int edge_num, char *demand)
         record_result(result[i]);
 }
 
-
 //分割demand
 int get_demand(int s,int d,int pass[50],char *demand)
 {
 	s = atoi(strtok(demand,","));
 	d = atoi(strtok(NULL, ","));
 	//PRINT("s=%d d=%d\n",s,d);
-	register int i=0;
+	int i=0;
 	char* tmp = strtok(strtok(NULL, ","), "|");
     while( tmp != NULL )
 	{
@@ -64,4 +88,31 @@ int get_demand(int s,int d,int pass[50],char *demand)
 		tmp = strtok( NULL, "|");
 	}
 	return i;
+}
+
+int all_hit(int v_num)
+{
+	int ret=1;
+	for(int i=0;i<v_num;i++){
+		ret &= state[i];
+	}
+	return ret;
+}
+
+void hit(int v){
+	for(int i=0;i<v_num;i++){
+		if(v==pass[i]){
+			state[i]=1;
+			break;
+		}
+	}
+}
+
+void dishit(int v){
+	for(int i=0;i<v_num;i++){
+		if(v==pass[i]){
+			state[i]=0;
+			break;
+		}
+	}
 }
