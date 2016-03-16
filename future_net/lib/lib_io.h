@@ -6,11 +6,14 @@
 //spec为允许解析的最大行数。
 extern int read_file(char ** const buff, const unsigned int spec, const char * const filename);
 
+extern int read_topo(int ** buff, const unsigned int spec, const char * const filename);
+
 //将result缓冲区中的内容写入文件，写入方式为覆盖写入
 extern void write_result(const char * const filename);
 
 //释放读文件的缓冲区
 extern void release_buff(char ** const buff, const int valid_item_num);
+extern void release_buffi(int ** const buff, const int valid_item_num);
 
 #endif
 

@@ -86,17 +86,51 @@ int read_file(char ** const buff, const unsigned int spec, const char * const fi
     return cnt;
 }
 
+int read_topo(int ** buff, const unsigned int spec, const char * const filename){
+    FILE *fp = fopen(filename, "r");
+    if (fp == NULL)
+    {
+        PRINT("Fail to open file %s, %s.\n", filename, strerror(errno));
+        return 0;
+    }
+    PRINT("Open file %s OK.\n", filename);
+
+    //int line[4];
+    unsigned int cnt = 0;
+    while ((cnt < spec) && !feof(fp))
+    {
+
+        buff[cnt] = (int* )malloc(4);
+        fscanf(fp,"%d,%d,%d,%d\n",&buff[cnt][0],&buff[cnt][1],&buff[cnt][2],&buff[cnt][3]);
+
+        //PRINT("%d %d %d %d\n",buff[cnt][0],buff[cnt][1],buff[cnt][2],buff[cnt][3]);
+
+        cnt++;
+    }
+    fclose(fp);
+    PRINT("There are %d lines in file %s.\n", cnt, filename);
+
+    return cnt;
+}
+
 void write_result(const char * const filename)
 {
     if (g_result[0] == '\0')
         return;
-
+    PRINT("%s\n",&g_result[0]);
     write_file(1, g_result, filename);
 }
 
 void release_buff(char ** const buff, const int valid_item_num)
 {
-    for (int i = 0; i < valid_item_num; i++)
+    register int i=0;
+    for (i = 0; i < valid_item_num; i++)
+        free(buff[i]);
+}
+void release_buffi(int ** const buff, const int valid_item_num)
+{
+    register int i=0;
+    for (i = 0; i < valid_item_num; i++)
         free(buff[i]);
 }
 
