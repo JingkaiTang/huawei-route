@@ -6,30 +6,35 @@
 #include <string.h>
 
 #define PRINT printf
+#define BOUND 6000 		//数组上界
+#define MAXCOST 60000	//初始化最大cost
 
 //节点
 typedef struct node_t
 {
-	int value;	//编号
+	int value;	//点编号
 	int n_child;//子节点数
-	int level;  //层数
-	int parent; //父节点
+	//int flag;  //flag
+	int parent; //父节点，-1表示根节点
 	int cost;   //到父节点的花费
 	int num;    //到父节点的边号
 	struct node_t** child;
 } NODE;
 
 //边权值
-int (*p)[600];
+int (*p)[BOUND];
 //序号
-int (*n)[600];
+int (*n)[BOUND];
 
-//源、目标点，点集，点状态集
-int s =0,d=0;
-int v_num=0;
-int state[50],pass[50],check[600];
+//节点数组
+NODE *node[BOUND];	
+
+//源、目标点，V'点个数，V点个数，点集V'，点集V'状态
+int source =0,dest=0;
+int v_num=0,max=0;
+int state[50],pass[50],check[BOUND];
 //cost初始值
-int cost = 60000;
+int cost = MAXCOST;
 
 //分割demand
 int get_demand(char *demand);
@@ -38,22 +43,28 @@ int all_hit(int v_num);
 //命中V'中点v
 void hit(int v);
 //取消命中V'中点v
-void dishit(int v); 
-//检查V中v是否选中，未选中则选中
-inline bool in(int v);
-//取消选中V中点v
-inline void out(int v);
+void dishit(int v);
+//创建节点
+node_t * create(int value,int parent);
+//搜索子节点
+int search(int value,int ret[]);
+//找到点集V中的最大值
+void maxf(int x,int y);
+//释放内存，没写
+void freef();
+
 
 //你要完成的功能总入口
 void search_route(int *topo[5000], int edge_num, char *demand)
 {
 
-	p=(int (*)[600])malloc(360000*sizeof(int)); 
-	n=(int (*)[600])malloc(360000*sizeof(int));
+	p=(int (*)[BOUND])malloc(BOUND*BOUND*sizeof(int)); 
+	n=(int (*)[BOUND])malloc(BOUND*BOUND*sizeof(int));
 
 	//初始化边序号/边权值矩阵
 	for(int i=0;i<edge_num;i++){
 		int x = topo[i][1], y=topo[i][2], v = topo[i][3];
+		maxf(x,y);
 		n[x][y]=topo[i][0];
 		if(p[x][y]==0||p[x][y]>v){
 			p[x][y]=v;
@@ -61,9 +72,26 @@ void search_route(int *topo[5000], int edge_num, char *demand)
 	}
 
 	v_num = get_demand(demand);
-	
+	//创建根节点
+	node[2]=create(2,-1);
 
 	/*
+	if(node[2]==NULL){
+		PRINT("1");
+	}
+	else{
+		PRINT("v=%d p=%d",node[2]->value,node[2]->parent);
+	}
+	//node[source]=create()
+
+
+	PRINT("max=%d\n",max);
+	int ret[max];
+	int j = search(2,ret);
+	for(int i=0;i<j;i++){
+		PRINT("%d ",ret[i]);
+	}
+
 	PRINT("%d\n",v_num);
 	
 	for(int i=0;i<20;i++){
@@ -74,18 +102,18 @@ void search_route(int *topo[5000], int edge_num, char *demand)
 	}
 	*/
 
-
     unsigned short result[] = {2, 6, 3};//示例中的一个解
 
     for (int i = 0; i < 3; i++)
         record_result(result[i]);
+    freef();
 }
 
 //分割demand
 int get_demand(char *demand)
 {
-	s = atoi(strtok(demand,","));
-	d = atoi(strtok(NULL, ","));
+	source = atoi(strtok(demand,","));
+	dest = atoi(strtok(NULL, ","));
 	//PRINT("s=%d d=%d\n",s,d);
 	int i=0;
 	char* tmp = strtok(strtok(NULL, ","), "|");
@@ -126,14 +154,33 @@ void dishit(int v){
 	}
 }
 
-inline bool in(int v){
-	if(check[v]==0){
-		check[v]=1;
-		return true;
-	}
-	return false;
+node_t * create(int value,int parent){
+	node_t *node = (node_t *)malloc(sizeof(node_t));
+	node->value = value;
+	node->parent = parent;
+
+
 }
 
-inline void out(int v){
-	check[v]=0;
+int search(int value,int ret[]){
+	int j=0;
+	for(int i=0;i<max+1;i++){
+		if(p[value][i]>0){
+			ret[j]=i;
+			j++;
+		}
+	}
+	return j;
+}
+
+void maxf(int x,int y){
+	if(x>y){
+		if(x>max) max=x;
+	}else{
+		if(y>max) max=y;
+	}
+}
+
+void freef(){
+	
 }
