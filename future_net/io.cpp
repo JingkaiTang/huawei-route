@@ -117,7 +117,7 @@ void write_result(const char * const filename)
 {
     if (g_result[0] == '\0')
         return;
-    PRINT("%s\n",&g_result[0]);
+    //PRINT("%s\n",&g_result[0]);
     write_file(1, g_result, filename);
 }
 

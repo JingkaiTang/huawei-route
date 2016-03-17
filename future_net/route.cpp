@@ -33,10 +33,10 @@ int v_num=0,max=0;
 int state[50],pass[50];
 //cost初始值
 int cost = MAXCOST;
-//暂存最短的指针
-int *shortpath;
 //最短路径边数
 int shortnum;
+//暂存最短的数组
+int shortpath[BOUND];	
 
 //分割demand
 int get_demand(char *demand);
@@ -76,14 +76,18 @@ void search_route(int *topo[5000], int edge_num, char *demand)
 
 	v_num = get_demand(demand);
 
+
+
 	//创建根节点
 	nodes[source]=create(source,-1);
+
+
 
 	for(int i=0;i<shortnum;i++){
 		record_result(shortpath[i]);
 	}
 	freef();
-    PRINT("The End......\n");
+    //PRINT("The End......\n");
 	/*
 	if(node[2]==NULL){
 		PRINT("1");
@@ -118,16 +122,15 @@ void search_route(int *topo[5000], int edge_num, char *demand)
 //分割demand
 int get_demand(char *demand)
 {
-	PRINT("demand= %s\n",demand);
+	//PRINT("demand= %s\n",demand);
 	source = atoi(strtok(demand,","));
 	dest = atoi(strtok(NULL, ","));
-	PRINT("s=%d,d=%d\n",source,dest);
+	//PRINT("s=%d,d=%d\n",source,dest);
 	int i=0;
 	char* tmp = strtok(strtok(NULL, ","), "|");
     while( tmp != NULL )
 	{
 		pass[i++]=atoi(tmp);
-		
 		tmp = strtok( NULL, "|");
 	}
 	return i;
@@ -161,15 +164,15 @@ void dishit(int v){
 }
 
 node_t * create(int value,int parent){
-	PRINT("1.value=%d,parent=%d\n",value,parent);
+	//PRINT("1.value=%d,parent=%d\n",value,parent);
 	//检查终点
 	if(value==dest){
 		if(all_hit()){
 			//找到路径
-			PRINT("0.find route\n");
+			//PRINT("0.find route\n");
 			path(parent);
 		}else{
-			PRINT("x.%d error\n", value);
+			//PRINT("x.%d error\n", value);
 			return NULL;
 		}
 	}
@@ -188,12 +191,12 @@ node_t * create(int value,int parent){
 		node->n_child = n_child;
 		nodes[value] = node;
 		hit(value);
-		PRINT("W. add node=%d\n",value);
-		PRINT("2. %d 's n_child=%d\n",value,n_child);
+		//PRINT("W. add node=%d\n",value);
+		//PRINT("2. %d 's n_child=%d\n",value,n_child);
 		for(int i=0;i<n_child;i++){
 			create(child_no[i],value);
 		}
-		PRINT("W. del node=%d\n",value);
+		//PRINT("W. del node=%d\n",value);
 		nodes[value]=NULL;
 		dishit(value);
 	}
@@ -225,7 +228,7 @@ void maxf(int x,int y){
 
 void path(int parent){
 	int ret_num = nodes[parent]->level+1;
-	PRINT("3. ret_edge_num=%d\n",ret_num);
+	//PRINT("3. ret_edge_num=%d\n",ret_num);
 	int ret[ret_num];
 	int thiscost = 0;
 	int to = dest;
@@ -235,15 +238,17 @@ void path(int parent){
 		ret[i]=n[from][to];
 		to = from;
 		from = nodes[to]->parent;
-		PRINT("3. cost = %d, edge num = %d\n",thiscost,ret[i]);
+		//PRINT("3. cost = %d, edge num = %d\n",thiscost,ret[i]);
 		if(from==-1){
 			break;
 		}
 	}
 	if(thiscost<cost){
 		cost=thiscost;
-		shortpath = ret;
 		shortnum = ret_num;
+		for(int i=0;i<ret_num;i++){
+			shortpath[i]=ret[i];
+		}
 	}
 }
 
