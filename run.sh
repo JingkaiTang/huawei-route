@@ -1,1 +1,1 @@
-bin/future_net "case/case$1/topo.csv" "case/case$1/demand.csv" "case/case$1/result.csv"
+bin/future_net "$1/topo.csv" "$1/demand.csv" "$1/result.csv"

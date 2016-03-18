@@ -81,7 +81,7 @@ void search_route(int *topo[5000], int edge_num, char *demand)
 	//创建根节点
 	nodes[source]=create(source,-1);
 
-
+	PRINT("@@@@@COST=%d\n",cost);
 
 	for(int i=0;i<shortnum;i++){
 		record_result(shortpath[i]);
@@ -197,6 +197,7 @@ node_t * create(int value,int parent){
 			create(child_no[i],value);
 		}
 		//PRINT("W. del node=%d\n",value);
+		free(node);
 		nodes[value]=NULL;
 		dishit(value);
 	}
@@ -246,6 +247,7 @@ void path(int parent){
 	if(thiscost<cost){
 		cost=thiscost;
 		shortnum = ret_num;
+		PRINT("cost = %d, edge num = %d\n",thiscost,ret_num);
 		for(int i=0;i<ret_num;i++){
 			shortpath[i]=ret[i];
 		}
