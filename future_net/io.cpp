@@ -37,10 +37,10 @@ void record_result(unsigned short edge)
 }
 
 void print_time(const char *head)
-{ 
-    struct timeb rawtime; 
-    struct tm * timeinfo; 
-    ftime(&rawtime); 
+{
+    struct timeb rawtime;
+    struct tm * timeinfo;
+    ftime(&rawtime);
     timeinfo = localtime(&rawtime.time);
 
     static int ms = rawtime.millitm;
@@ -55,7 +55,7 @@ void print_time(const char *head)
         out_ms += 1000;
         out_s -= 1;
     }
-    printf("%s date/time is: %s \tused time is %lu s %d ms.\n", head, asctime(timeinfo), out_s, out_ms); 
+    printf("%s date/time is: %s \tused time is %lu s %d ms.\n", head, asctime(timeinfo), out_s, out_ms);
 }
 
 int read_file(char ** const buff, const unsigned int spec, const char * const filename)
@@ -149,4 +149,3 @@ INLINE void write_file(const bool cover, const char * const buff, const char * c
     fputs("\n", fp);
     fclose(fp);
 }
-
