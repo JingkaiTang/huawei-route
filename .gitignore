@@ -1,0 +1,6 @@
+# Git Ignore
+
+bin/
+build/
+result.csv
+future_net.tar.gz
