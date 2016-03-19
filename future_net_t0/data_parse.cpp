@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+int compare(const void *a, const void *b) {
+  return *(int *)a - *(int *)b;
+}
+
 int topo_parse(TopoNode *topo, int topo_size, char **lines, int line_num) {
   if (topo_size <= 0 || line_num <= 0) {
     printf("%s\n", "Call topo_parse Erro for negative topo_size or line_num");
@@ -122,6 +126,9 @@ DemandSet *demand_parse(char *demand_line) {
   demand->end = tmp_end;
   demand->pass_size = tmp_pass_size;
   demand->pass = tmp_pass;
+
+  // sort
+  qsort(demand->pass, demand->pass_size, sizeof(int), compare);
 
   return demand;
 }
