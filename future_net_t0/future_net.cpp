@@ -29,8 +29,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    printf("%s\n", demand_line);
-
     TopoNode topo[600];
     int topo_max_index = topo_parse(topo, 600, topo_lines, edge_num);
     topo_show(topo, topo_max_index);
@@ -38,12 +36,12 @@ int main(int argc, char *argv[])
     DemandSet *demand = demand_parse(demand_line);
     demand_show(demand);
 
-    // search_route(topo, edge_num, demand);
+    search_route(topo, demand);
 
-    // char *result_file = argv[3];
-    // write_result(result_file);
-    // release_buff(topo, edge_num);
-    // release_buff(&demand, 1);
+    char *result_file = argv[3];
+    write_result(result_file);
+    release_buff(topo_lines, edge_num);
+    release_buff(&demand_line, 1);
 
     print_time("End");
 
