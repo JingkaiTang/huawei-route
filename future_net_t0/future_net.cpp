@@ -35,6 +35,9 @@ int main(int argc, char *argv[])
     int topo_max_index = topo_parse(topo, 600, topo_lines, edge_num);
     topo_show(topo, topo_max_index);
 
+    DemandSet *demand = demand_parse(demand_line);
+    demand_show(demand);
+
     // search_route(topo, edge_num, demand);
 
     // char *result_file = argv[3];
