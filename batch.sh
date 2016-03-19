@@ -3,10 +3,11 @@
 SCRIPT=$(readlink -f "$0")
 BASEDIR=$(dirname "$SCRIPT")
 cd $BASEDIR
+future_net="future_net"$1
 
-if [ ! -d future_net ] || [ ! -f readme.txt ]
+if [ ! -d $future_net ] || [ ! -f readme.txt ]
 then
-    echo "ERROR: $BASEDIR is not a valid directory of SDK-gcc for future_net."
+    echo "ERROR: $BASEDIR is not a valid directory of SDK-gcc for $future_net."
     echo "  Please run this script in a regular directory of SDK-gcc."
     exit -1
 fi
@@ -25,11 +26,11 @@ mkdir bin
 rm -fr build
 mkdir build
 cd build
-cmake ../future_net
-make 
+cmake ../$future_net
+make
 
 cd ..
-cp -r future_net bin/code
+cp -r $future_net bin/code
 cd bin
 tar -zcPf future_net.tar.gz *
 cp future_net.tar.gz ../
