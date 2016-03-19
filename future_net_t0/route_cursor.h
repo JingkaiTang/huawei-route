@@ -15,8 +15,6 @@ struct RouteCursor {
   vector<int> path;
 };
 
-bool operator> (RouteCursor a, RouteCursor b) {
-  return a.value > b.value;
-}
+bool operator> (RouteCursor a, RouteCursor b);
 
 #endif
