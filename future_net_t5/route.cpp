@@ -10,10 +10,10 @@
 
 using namespace std;
 
-#define GAMMA 20
+#define GAMMA 25
 
 void greedy_search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
-  const int ALPHA = 1;
+  const int ALPHA = 100;
   const int BETA = 0;
   LOG("DEMAND => ");
   BITMAP_SHOW(demand->bitmap);
@@ -56,7 +56,7 @@ void greedy_search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
     if (cursor->pass_count == demand->pass_size && cursor->cur_node == demand->end) {
       LOG("PATH FIND!!!\n");
       result = cursor;
-      goto RESULT;
+      goto GREEDY_RESULT;
     }
     LOG("PATH NOT FIND!!!\n");
 
@@ -104,7 +104,7 @@ void greedy_search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
     delete cursor;
   }
 
-  RESULT:
+  GREEDY_RESULT:
   if (result != NULL && result->path_size > 1) {
     CURSOR_SHOW(result);
     int pre_node = result->path[0];
@@ -123,7 +123,7 @@ void greedy_search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
 
 void modest_search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
   const int ALPHA = 1;
-  const int BETA = 10;
+  const int BETA = 5;
   LOG("DEMAND => ");
   BITMAP_SHOW(demand->bitmap);
 
