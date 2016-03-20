@@ -12,6 +12,7 @@ using namespace std;
 
 #define ALPHA 1
 #define BETA 10
+#define GAMMA 20
 
 void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
   LOG("DEMAND => ");
@@ -51,6 +52,14 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
     explorer.pop();
     CURSOR_SHOW(cursor);
 
+    // test if find
+    if (node_scope <= GAMMA && cursor->pass_count == demand->pass_size && cursor->cur_node == demand->end) {
+      LOG("PATH FIND!!!\n");
+      result = cursor;
+      goto RESULT;
+    }
+    LOG("PATH NOT FIND!!!\n");
+
     cur_node = &topo[cursor->cur_node];
     for (int i = 0; i < cur_node->out_degree; i ++) {
       LOG("Extend node %d:\n", i);
@@ -86,7 +95,7 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
       BITMAP_SHOW(new_cursor->bitmap);
 
       // test if find
-      if (new_cursor->pass_count == demand->pass_size && new_cursor->cur_node == demand->end) {
+      if (node_scope > GAMMA && new_cursor->pass_count == demand->pass_size && new_cursor->cur_node == demand->end) {
         LOG("PATH FIND!!!\n");
         result = new_cursor;
         goto RESULT;
