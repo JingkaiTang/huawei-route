@@ -3,6 +3,6 @@
 
 #include "data.h"
 
-void search_route(TopoNode *topo, DemandSet *demand);
+void search_route(TopoNode *topo, int node_scope, DemandSet *demand);
 
 #endif

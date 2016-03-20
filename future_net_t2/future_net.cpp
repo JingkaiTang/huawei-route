@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     DemandSet *demand = demand_parse(demand_line);
     DEMAND_SHOW(demand);
 
-    search_route(topo, demand);
+    search_route(topo, topo_max_index+1, demand);
 
     char *result_file = argv[3];
     write_result(result_file);

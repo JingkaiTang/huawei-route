@@ -118,5 +118,10 @@ DemandSet *demand_parse(char *demand_line) {
   // sort
   qsort(demand->pass, demand->pass_size, sizeof(int), compare);
 
+  demand->bitmap = new Bitmap(demand->pass[demand->pass_size-1] + 1);
+  for (int i = 0; i < demand->pass_size; i ++) {
+    demand->bitmap->set(demand->pass[i]);
+  }
+
   return demand;
 }

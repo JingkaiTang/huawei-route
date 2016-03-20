@@ -8,6 +8,8 @@ public:
   int *data;
 
   Bitmap(int size);
+  Bitmap(Bitmap *bitmap);
+  ~Bitmap();
   void set(int location);
   void unset(int location);
   bool test(int location);

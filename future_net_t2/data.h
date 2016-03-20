@@ -1,6 +1,8 @@
 #ifndef __DATA_H__
 #define __DATA_H__
 
+#include "bitmap.h"
+
 struct TopoArrow {
   int target;
   int number;
@@ -17,6 +19,7 @@ struct DemandSet {
   int end;
   int pass_size;
   int *pass;
+  Bitmap *bitmap;
 };
 
 #endif

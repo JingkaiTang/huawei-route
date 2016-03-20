@@ -12,7 +12,7 @@ using namespace std;
 #define ALPHA 1
 #define BETA 10
 
-void search_route(TopoNode *topo, DemandSet *demand) {
+void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
   if (demand->start == demand->end) {
     LOG("Start == End\n");
     return;
@@ -29,6 +29,8 @@ void search_route(TopoNode *topo, DemandSet *demand) {
   start->cost = 0;
   start->pass_count = 0;
   start->value = 0;
+  start->bitmap = new Bitmap(node_scope);
+  start->bitmap->set(demand->start);
 
   CURSOR_SHOW(start);
 
@@ -38,12 +40,10 @@ void search_route(TopoNode *topo, DemandSet *demand) {
   RouteCursor *result = NULL;
   TopoNode *cur_node = NULL;
   TopoArrow *cur_arrow = NULL;
-  bool conflict = false;
   while (!explorer.empty()) {
     LOG("Begin to extend a new node:\n");
     RouteCursor *cursor = explorer.top();
     explorer.pop();
-
     CURSOR_SHOW(cursor);
 
     cur_node = &topo[cursor->cur_node];
@@ -56,35 +56,23 @@ void search_route(TopoNode *topo, DemandSet *demand) {
         continue;
       }
 
-      conflict = false;
-
-      for (vector<int>::iterator it = cursor->path->begin(); it != cursor->path->end(); it ++) {
-        if (*it == cur_arrow->target) {
+      // if already added, conflict
+      if (cursor->bitmap->test(cur_arrow->target)) {
           LOG("Node %d conflict!\n", i);
-          conflict = true;
-          break;
-        }
-      }
-
-      if (conflict) {
-        continue;
+          continue;
       }
 
       RouteCursor *new_cursor = new RouteCursor();
       new_cursor->cur_node = cur_arrow->target;
       new_cursor->cost = cursor->cost + cur_arrow->cost;
       new_cursor->pass_count = cursor->pass_count;
-      for (int j = 0; j < demand->pass_size; j ++) {
-        if (demand->pass[j] == cur_arrow->target) {
+      if (demand->bitmap->test(cur_arrow->target)) {
           new_cursor->pass_count ++;
-          break;
-        }
       }
-      new_cursor->path = new vector<int>();
-      for (vector<int>::iterator it = cursor->path->begin(); it != cursor->path->end(); it ++) {
-        new_cursor->path->push_back(*it);
-      }
+      new_cursor->path = new vector<int>(*(cursor->path));
       new_cursor->path->push_back(cur_arrow->target);
+      new_cursor->bitmap = new Bitmap(cursor->bitmap);
+      new_cursor->bitmap->set(cur_arrow->target);
       new_cursor->value = (ALPHA * new_cursor->cost + BETA * demand->pass_size) / (new_cursor->pass_count + 1);
       CURSOR_SHOW(new_cursor);
 
@@ -95,12 +83,12 @@ void search_route(TopoNode *topo, DemandSet *demand) {
         goto RESULT;
       }
 
-
       explorer.push(new_cursor);
       LOG("Push to Explorer: size=>%d\n", explorer.size());
     }
 
     delete cursor->path;
+    delete cursor->bitmap;
     delete cursor;
   }
 

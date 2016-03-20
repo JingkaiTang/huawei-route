@@ -1,6 +1,8 @@
 #ifndef __ROUTE_CURSOR_H__
 #define __ROUTE_CURSOR_H__
 
+#include "bitmap.h"
+
 #include <vector>
 
 using namespace std;
@@ -11,6 +13,7 @@ struct RouteCursor {
   int pass_count;
   int value;
   vector<int> *path;
+  Bitmap *bitmap;
 };
 
 struct rc_greater {
