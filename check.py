@@ -59,8 +59,9 @@ def check(topo, demand, result):
         if topo[path][1] in demand['Pass']:
             demand['Pass'].remove(topo[path][1])
             cost += int(topo[path][3])
-        else:
-            return WRONG_ANSWER
+
+    if len(demand['Pass']) > 0:
+        return WRONG_ANSWER
 
     return cost
 
