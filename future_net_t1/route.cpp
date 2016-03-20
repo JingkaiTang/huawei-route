@@ -10,7 +10,7 @@
 using namespace std;
 
 #define ALPHA 1
-#define BETA 0
+#define BETA 10
 
 void search_route(TopoNode *topo, DemandSet *demand) {
   if (demand->start == demand->end) {
@@ -51,7 +51,7 @@ void search_route(TopoNode *topo, DemandSet *demand) {
       LOG("Extend node %d:\n", i);
       cur_arrow = &(cur_node->arrows[i]);
 
-      if (cur_arrow->target == demand->end && cursor->pass_count + 1 < demand->pass_size) {
+      if (cur_arrow->target == demand->end && cursor->pass_count < demand->pass_size) {
         LOG("TOO EARLY TO PASS END NODE!!!\n");
         continue;
       }
@@ -62,6 +62,7 @@ void search_route(TopoNode *topo, DemandSet *demand) {
         if (*it == cur_arrow->target) {
           LOG("Node %d conflict!\n", i);
           conflict = true;
+          break;
         }
       }
 
@@ -98,7 +99,7 @@ void search_route(TopoNode *topo, DemandSet *demand) {
       explorer.push(new_cursor);
       LOG("Push to Explorer: size=>%d\n", explorer.size());
     }
-    
+
     delete cursor->path;
     delete cursor;
   }
