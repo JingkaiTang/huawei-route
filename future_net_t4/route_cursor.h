@@ -3,8 +3,6 @@
 
 #include "bitmap.h"
 
-#include <vector>
-
 using namespace std;
 
 struct RouteCursor {
@@ -12,7 +10,8 @@ struct RouteCursor {
   int cost;
   int pass_count;
   int value;
-  vector<int> *path;
+  int path_size;
+  int *path;
   Bitmap *bitmap;
 };
 

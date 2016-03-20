@@ -12,12 +12,11 @@ void bitmap_show(Bitmap *bitmap) {
 
 void cursor_show(RouteCursor *cursor) {
   printf("Cursor: cur_node=>%d, cost=>%d, pass_count=>%d, value=>%d, path=>{", cursor->cur_node, cursor->cost, cursor->pass_count, cursor->value);
-  vector<int>::iterator it = cursor->path->begin();
-  if (cursor->path->size() > 0) {
-    printf("%d", *it);
+  if (cursor->path_size > 0) {
+    printf("%d", cursor->path[0]);
   }
-  for (it ++; it != cursor->path->end(); it ++) {
-    printf(" ,%d", *it);
+  for (int i = 1; i < cursor->path_size; i ++) {
+    printf(" ,%d", cursor->path[i]);
   }
   printf("}\n");
 }

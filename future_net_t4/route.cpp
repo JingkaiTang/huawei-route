@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <queue>
+#include <string.h>
 
 using namespace std;
 
@@ -27,8 +28,9 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
   // start:
   RouteCursor *start = new RouteCursor();
   start->cur_node = demand->start;
-  start->path = new vector<int>();
-  start->path->push_back(demand->start);
+  start->path_size = 1;
+  start->path = new int[1]();
+  start->path[0] = demand->start;
   start->cost = 0;
   start->pass_count = 0;
   start->value = 0;
@@ -73,8 +75,10 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
       if (demand->bitmap->test(cur_arrow->target)) {
           new_cursor->pass_count ++;
       }
-      new_cursor->path = new vector<int>(*(cursor->path));
-      new_cursor->path->push_back(cur_arrow->target);
+      new_cursor->path_size = cursor->path_size + 1;
+      new_cursor->path = new int[new_cursor->path_size];
+      memcpy(new_cursor->path, cursor->path, sizeof(int)*cursor->path_size);
+      new_cursor->path[cursor->path_size] = cur_arrow->target;
       new_cursor->bitmap = new Bitmap(cursor->bitmap);
       new_cursor->bitmap->set(cur_arrow->target);
       new_cursor->value = (ALPHA * new_cursor->cost + BETA * demand->pass_size) / (new_cursor->pass_count + 1);
@@ -94,19 +98,18 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
     }
 
     LOG("Delete old cursor ...\n");
-    delete cursor->path;
+    delete[] cursor->path;
     delete cursor->bitmap;
     delete cursor;
   }
 
   RESULT:
-  if (result != NULL && !result->path->empty()) {
+  if (result != NULL && result->path_size > 1) {
     CURSOR_SHOW(result);
-    vector<int>::iterator it = result->path->begin();
-    int pre_node = *it;
+    int pre_node = result->path[0];
     int cur_node = 0;
-    for (it ++; it != result->path->end(); it ++) {
-      cur_node = *it;
+    for (int i = 1; i < result->path_size; i ++) {
+      cur_node = result->path[i];
       for (int j = 0; j < topo[pre_node].out_degree; j ++) {
         if (topo[pre_node].arrows[j].target == cur_node) {
           record_result(topo[pre_node].arrows[j].number);
