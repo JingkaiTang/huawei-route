@@ -1,12 +1,15 @@
 #include "naive_debug.h"
 
+#include <vector>
+
 void cursor_show(RouteCursor *cursor) {
   printf("Cursor: cur_node=>%d, cost=>%d, pass_count=>%d, value=>%d, path=>{", cursor->cur_node, cursor->cost, cursor->pass_count, cursor->value);
-  if (cursor->path.size() > 0) {
-    printf("%d", cursor->path[0]);
+  vector<int>::iterator it = cursor->path->begin();
+  if (cursor->path->size() > 0) {
+    printf("%d", *it);
   }
-  for (int i = 1; i < cursor->path.size(); i ++) {
-    printf(" ,%d", cursor->path[i]);
+  for (it ++; it != cursor->path->end(); it ++) {
+    printf(" ,%d", *it);
   }
   printf("}\n");
 }

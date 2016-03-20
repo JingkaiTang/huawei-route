@@ -12,7 +12,7 @@ struct RouteCursor {
   int cost;
   int pass_count;
   int value;
-  vector<int> path;
+  vector<int> *path;
 };
 
 bool operator> (RouteCursor a, RouteCursor b);
