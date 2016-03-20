@@ -2,7 +2,8 @@
 
 #include <string.h>
 
-Bitmap::Bitmap(int size):size(size) {
+Bitmap::Bitmap(int _size) {
+  size = _size;
   data_size = (size+sizeof(int)*8-1) / (sizeof(int)*8);
   data = new int[data_size]();
 }
@@ -11,7 +12,7 @@ Bitmap::Bitmap(Bitmap *bitmap) {
   size = bitmap->size;
   data_size = bitmap->data_size;
   data = new int[data_size];
-  memcpy(data, bitmap->data, size);
+  memcpy(data, bitmap->data, sizeof(int)*data_size);
 }
 
 Bitmap::~Bitmap() {

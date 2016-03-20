@@ -7,7 +7,7 @@ public:
   int data_size;
   int *data;
 
-  Bitmap(int size);
+  Bitmap(int _size);
   Bitmap(Bitmap *bitmap);
   ~Bitmap();
   void set(int location);

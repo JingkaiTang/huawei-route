@@ -13,6 +13,9 @@ using namespace std;
 #define BETA 10
 
 void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
+  LOG("DEMAND => ");
+  BITMAP_SHOW(demand->bitmap);
+
   if (demand->start == demand->end) {
     LOG("Start == End\n");
     return;
@@ -31,8 +34,8 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
   start->value = 0;
   start->bitmap = new Bitmap(node_scope);
   start->bitmap->set(demand->start);
-
   CURSOR_SHOW(start);
+  BITMAP_SHOW(start->bitmap);
 
   explorer.push(start);
   LOG("Push to Explorer: size=>%d\n", explorer.size());
@@ -51,6 +54,7 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
       LOG("Extend node %d:\n", i);
       cur_arrow = &(cur_node->arrows[i]);
 
+      // if early end node
       if (cur_arrow->target == demand->end && cursor->pass_count < demand->pass_size) {
         LOG("TOO EARLY TO PASS END NODE!!!\n");
         continue;
@@ -75,6 +79,7 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
       new_cursor->bitmap->set(cur_arrow->target);
       new_cursor->value = (ALPHA * new_cursor->cost + BETA * demand->pass_size) / (new_cursor->pass_count + 1);
       CURSOR_SHOW(new_cursor);
+      BITMAP_SHOW(new_cursor->bitmap);
 
       // test if find
       if (new_cursor->pass_count == demand->pass_size && new_cursor->cur_node == demand->end) {
@@ -82,11 +87,13 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
         result = new_cursor;
         goto RESULT;
       }
+      LOG("PATH NOT FIND!!!\n");
 
       explorer.push(new_cursor);
       LOG("Push to Explorer: size=>%d\n", explorer.size());
     }
 
+    LOG("Delete old cursor ...\n");
     delete cursor->path;
     delete cursor->bitmap;
     delete cursor;

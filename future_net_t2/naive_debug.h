@@ -5,8 +5,16 @@
 
 #include "route_cursor.h"
 #include "data.h"
+#include "bitmap.h"
 
 #include <stdio.h>
+
+#ifdef __DEBUG__
+void bitmap_show(Bitmap *bitmap);
+#define BITMAP_SHOW(bitmap) bitmap_show(bitmap)
+#else
+#define BITMAP_SHOW(bitmap)
+#endif
 
 #ifdef __DEBUG__
 #define LOG(fmt, args...) printf(fmt, ##args)

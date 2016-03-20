@@ -2,6 +2,14 @@
 
 #include <vector>
 
+void bitmap_show(Bitmap *bitmap) {
+  printf("Bitmap => {size: %d, data_size: %d, data:", bitmap->size, bitmap->data_size);
+  for (int i = 0; i < bitmap->data_size; i ++) {
+    printf(" %d", bitmap->data[i]);
+  }
+  printf("}\n");
+}
+
 void cursor_show(RouteCursor *cursor) {
   printf("Cursor: cur_node=>%d, cost=>%d, pass_count=>%d, value=>%d, path=>{", cursor->cur_node, cursor->cost, cursor->pass_count, cursor->value);
   vector<int>::iterator it = cursor->path->begin();
