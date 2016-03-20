@@ -18,19 +18,19 @@ void search_route(TopoNode *topo, DemandSet *demand) {
     return;
   }
 
-  priority_queue<RouteCursor, vector<RouteCursor>, greater<RouteCursor> > explorer;
+  priority_queue<RouteCursor *, vector<RouteCursor *>, rc_greater> explorer;
   LOG("New Explorer: size=>%d\n", explorer.size());
 
   // start:
-  RouteCursor start;
-  start.cur_node = demand->start;
-  start.path = new vector<int>();
-  start.path->push_back(demand->start);
-  start.cost = 0;
-  start.pass_count = 0;
-  start.value = 0;
+  RouteCursor *start = new RouteCursor();
+  start->cur_node = demand->start;
+  start->path = new vector<int>();
+  start->path->push_back(demand->start);
+  start->cost = 0;
+  start->pass_count = 0;
+  start->value = 0;
 
-  CURSOR_SHOW(&start);
+  CURSOR_SHOW(start);
 
   explorer.push(start);
   LOG("Push to Explorer: size=>%d\n", explorer.size());
@@ -42,10 +42,9 @@ void search_route(TopoNode *topo, DemandSet *demand) {
   bool conflict = false;
   while (!explorer.empty()) {
     LOG("Begin to extend a new node:\n");
-    RouteCursor tmp_cursor = explorer.top();
+    cursor = explorer.top();
     explorer.pop();
 
-    cursor = &tmp_cursor;
     CURSOR_SHOW(cursor);
 
     cur_node = &topo[cursor->cur_node];
@@ -65,28 +64,28 @@ void search_route(TopoNode *topo, DemandSet *demand) {
         continue;
       }
 
-      RouteCursor new_cursor;
-      new_cursor.cur_node = cur_arrow->target;
-      new_cursor.cost = cursor->cost + cur_arrow->cost;
-      new_cursor.pass_count = cursor->pass_count;
+      RouteCursor *new_cursor = new RouteCursor();
+      new_cursor->cur_node = cur_arrow->target;
+      new_cursor->cost = cursor->cost + cur_arrow->cost;
+      new_cursor->pass_count = cursor->pass_count;
       for (int j = 0; j < demand->pass_size; j ++) {
         if (demand->pass[j] == cur_arrow->target) {
-          new_cursor.pass_count ++;
+          new_cursor->pass_count ++;
           break;
         }
       }
-      new_cursor.path = new vector<int>();
+      new_cursor->path = new vector<int>();
       for (vector<int>::iterator it = cursor->path->begin(); it != cursor->path->end(); it ++) {
-        new_cursor.path->push_back(*it);
+        new_cursor->path->push_back(*it);
       }
-      new_cursor.path->push_back(cur_arrow->target);
-      new_cursor.value = (ALPHA * new_cursor.cost + BETA * demand->pass_size) / (new_cursor.pass_count + 1);
+      new_cursor->path->push_back(cur_arrow->target);
+      new_cursor->value = (ALPHA * new_cursor->cost + BETA * demand->pass_size) / (new_cursor->pass_count + 1);
       CURSOR_SHOW(&new_cursor);
 
       // test if find
-      if (new_cursor.pass_count == demand->pass_size && new_cursor.cur_node == demand->end) {
+      if (new_cursor->pass_count == demand->pass_size && new_cursor->cur_node == demand->end) {
         LOG("PATH FIND!!!\n");
-        result = &new_cursor;
+        result = new_cursor;
         goto RESULT;
       }
 
