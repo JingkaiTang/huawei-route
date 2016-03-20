@@ -13,6 +13,11 @@ using namespace std;
 #define BETA 100
 
 void search_route(TopoNode *topo, DemandSet *demand) {
+  if (demand->start == demand->end) {
+    LOG("Start == End\n");
+    return;
+  }
+
   priority_queue<RouteCursor, vector<RouteCursor>, greater<RouteCursor> > explorer;
   LOG("New Explorer: size=>%d\n", explorer.size());
 
@@ -41,12 +46,6 @@ void search_route(TopoNode *topo, DemandSet *demand) {
 
     cursor = &tmp_cursor;
     CURSOR_SHOW(cursor);
-
-    if (cursor->pass_count == demand->pass_size && cursor->cur_node == demand->end) {
-      LOG("PATH FIND!!!\n");
-      result = cursor;
-      break;
-    }
 
     cur_node = &topo[cursor->cur_node];
     for (int i = 0; i < cur_node->out_degree; i ++) {
