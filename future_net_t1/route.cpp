@@ -89,6 +89,11 @@ void search_route(TopoNode *topo, DemandSet *demand) {
         goto RESULT;
       }
 
+      if (new_cursor->cur_node == demand->end && new_cursor->pass_count < demand->pass_size) {
+        LOG("TOO EARLY TO PASS END NODE!!!\n");
+        continue;
+      }
+
       explorer.push(new_cursor);
       LOG("Push to Explorer: size=>%d\n", explorer.size());
     }
