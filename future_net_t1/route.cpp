@@ -10,7 +10,7 @@
 using namespace std;
 
 #define ALPHA 1
-#define BETA 10
+#define BETA 0
 
 void search_route(TopoNode *topo, DemandSet *demand) {
   if (demand->start == demand->end) {
@@ -36,13 +36,12 @@ void search_route(TopoNode *topo, DemandSet *demand) {
   LOG("Push to Explorer: size=>%d\n", explorer.size());
 
   RouteCursor *result = NULL;
-  RouteCursor *cursor = NULL;
   TopoNode *cur_node = NULL;
   TopoArrow *cur_arrow = NULL;
   bool conflict = false;
   while (!explorer.empty()) {
     LOG("Begin to extend a new node:\n");
-    cursor = explorer.top();
+    RouteCursor *cursor = explorer.top();
     explorer.pop();
 
     CURSOR_SHOW(cursor);
@@ -51,6 +50,12 @@ void search_route(TopoNode *topo, DemandSet *demand) {
     for (int i = 0; i < cur_node->out_degree; i ++) {
       LOG("Extend node %d:\n", i);
       cur_arrow = &(cur_node->arrows[i]);
+
+      if (cur_arrow->target == demand->end && cursor->pass_count + 1 < demand->pass_size) {
+        LOG("TOO EARLY TO PASS END NODE!!!\n");
+        continue;
+      }
+
       conflict = false;
 
       for (vector<int>::iterator it = cursor->path->begin(); it != cursor->path->end(); it ++) {
@@ -80,7 +85,7 @@ void search_route(TopoNode *topo, DemandSet *demand) {
       }
       new_cursor->path->push_back(cur_arrow->target);
       new_cursor->value = (ALPHA * new_cursor->cost + BETA * demand->pass_size) / (new_cursor->pass_count + 1);
-      CURSOR_SHOW(&new_cursor);
+      CURSOR_SHOW(new_cursor);
 
       // test if find
       if (new_cursor->pass_count == demand->pass_size && new_cursor->cur_node == demand->end) {
@@ -89,14 +94,13 @@ void search_route(TopoNode *topo, DemandSet *demand) {
         goto RESULT;
       }
 
-      if (new_cursor->cur_node == demand->end && new_cursor->pass_count < demand->pass_size) {
-        LOG("TOO EARLY TO PASS END NODE!!!\n");
-        continue;
-      }
 
       explorer.push(new_cursor);
       LOG("Push to Explorer: size=>%d\n", explorer.size());
     }
+    
+    delete cursor->path;
+    delete cursor;
   }
 
   RESULT:
