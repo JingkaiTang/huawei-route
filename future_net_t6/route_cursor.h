@@ -15,6 +15,8 @@ struct RouteCursor {
   Bitmap *bitmap;
 };
 
+bool operator< (const RouteCursor &a, const RouteCursor &b);
+
 struct rc_greater {
   bool operator() (const RouteCursor *a, const RouteCursor *b) {
     return a->value > b->value;
