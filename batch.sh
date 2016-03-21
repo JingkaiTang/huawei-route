@@ -26,7 +26,9 @@ mkdir bin
 rm -fr build
 mkdir build
 cd build
-cmake ../$future_net
+# cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=-pg ../$future_net
+# cmake -DCMAKE_BUILD_TYPE=Relese -DCMAKE_CXX_FLAGS=-pg ../$future_net
+cmake -DCMAKE_BUILD_TYPE=Relese ../$future_net
 make
 
 cd ..
