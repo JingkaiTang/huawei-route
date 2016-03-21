@@ -10,9 +10,8 @@
 
 using namespace std;
 
-#define ALPHA 1
-#define BETA 10
-#define GAMMA 20
+#define ALPHA 8
+#define BETA 4
 
 void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
   LOG("DEMAND => ");
@@ -53,7 +52,7 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
     CURSOR_SHOW(cursor);
 
     // test if find
-    if (node_scope <= GAMMA && cursor->pass_count == demand->pass_size && cursor->cur_node == demand->end) {
+    if (cursor->pass_count == demand->pass_size && cursor->cur_node == demand->end) {
       LOG("PATH FIND!!!\n");
       result = cursor;
       goto RESULT;
@@ -90,17 +89,9 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
       new_cursor->path[cursor->path_size] = cur_arrow->target;
       new_cursor->bitmap = new Bitmap(cursor->bitmap);
       new_cursor->bitmap->set(cur_arrow->target);
-      new_cursor->value = (ALPHA * new_cursor->cost + BETA * demand->pass_size) / (new_cursor->pass_count + 1);
+      new_cursor->value = ((new_cursor->cost << ALPHA) + (demand->pass_size << BETA)) / (new_cursor->pass_count + 1);
       CURSOR_SHOW(new_cursor);
       BITMAP_SHOW(new_cursor->bitmap);
-
-      // test if find
-      if (node_scope > GAMMA && new_cursor->pass_count == demand->pass_size && new_cursor->cur_node == demand->end) {
-        LOG("PATH FIND!!!\n");
-        result = new_cursor;
-        goto RESULT;
-      }
-      LOG("PATH NOT FIND!!!\n");
 
       explorer.push(new_cursor);
       LOG("Push to Explorer: size=>%d\n", explorer.size());
