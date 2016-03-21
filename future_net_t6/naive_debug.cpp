@@ -2,6 +2,15 @@
 
 #include <vector>
 
+void heap_show(TrickyHeap *heap) {
+  printf("Heap ===>\n");
+  for (int i = 1; i <= heap->size; i ++) {
+    printf("[%d] => ", i);
+    CURSOR_SHOW(&heap->fa[i]);
+  }
+  printf("<=== Heap\n");
+}
+
 void bitmap_show(Bitmap *bitmap) {
   printf("Bitmap => {size: %d, data_size: %d, data:", bitmap->size, bitmap->data_size);
   for (int i = 0; i < bitmap->data_size; i ++) {

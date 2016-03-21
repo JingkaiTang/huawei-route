@@ -6,8 +6,16 @@
 #include "route_cursor.h"
 #include "data.h"
 #include "bitmap.h"
+#include "tricky_heap.h"
 
 #include <stdio.h>
+
+#ifdef __DEBUG__
+void heap_show(TrickyHeap *heap);
+#define HEAP_SHOW(heap) heap_show(heap)
+#else
+#define HEAP_SHOW(heap)
+#endif
 
 #ifdef __DEBUG__
 void bitmap_show(Bitmap *bitmap);

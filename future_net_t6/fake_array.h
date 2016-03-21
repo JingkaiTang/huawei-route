@@ -19,7 +19,8 @@ public:
 };
 
 template <class T>
-FakeArray<T>::FakeArray(int sc): capacity(0), slot_capacity(sc), slots_size(0), slots_capacity(0) {
+FakeArray<T>::FakeArray(int sc): capacity(0), slot_capacity(sc), slots_size(0), slots_capacity(10) {
+  slots = new T*[slots_capacity];
   extend();
 }
 
