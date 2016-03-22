@@ -5,7 +5,8 @@
 
 using namespace std;
 
-struct RouteCursor {
+class RouteCursor {
+public:
   int cur_node;
   int cost;
   int pass_count;
@@ -13,14 +14,11 @@ struct RouteCursor {
   int path_size;
   int *path;
   Bitmap *bitmap;
+
+  void reset();
+  void recycle();
 };
 
 bool operator< (const RouteCursor &a, const RouteCursor &b);
-
-struct rc_greater {
-  bool operator() (const RouteCursor *a, const RouteCursor *b) {
-    return a->value > b->value;
-  }
-};
 
 #endif

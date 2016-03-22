@@ -4,9 +4,15 @@
 
 void heap_show(TrickyHeap *heap) {
   printf("Heap ===>\n");
-  for (int i = 1; i <= heap->size; i ++) {
-    printf("[%d] => ", i);
-    CURSOR_SHOW(&heap->fa[i]);
+  int index = 0;
+  HeapSlot *slot = heap->slots;
+  while (slot != NULL) {
+    for (int i = 0; i < slot->size; i ++) {
+      printf("[%d] => ", index);
+      CURSOR_SHOW(&slot->fa[i]);
+    }
+    index ++;
+    slot = slot->next;
   }
   printf("<=== Heap\n");
 }

@@ -2,20 +2,24 @@
 #define __TRICKY_HEAP_H__
 
 #include "route_cursor.h"
-#include "fake_array.h"
+#include "heap_slot.h"
 
-// root index is 1, 0 for pop top
 class TrickyHeap {
 public:
+  int MAX_BOUND;
   int size;
-  FakeArray<RouteCursor> fa;
-  TrickyHeap();
-  ~TrickyHeap();
+  RouteCursor top_cursor;
+  RouteCursor new_cursor;
+  int min_bound_distance;
+  int slot_extend_step;
+  HeapSlot *slots;
+  TrickyHeap(int mbd = 512, int ses = 64);
   RouteCursor &pop();
   RouteCursor &get();
   void balance();
-  int spin_up(int index);
-  int spin_down(int index);
+private:
+  HeapSlot *divide(HeapSlot *slot);
+  HeapSlot *remove(HeapSlot *slot);
 };
 
 #endif

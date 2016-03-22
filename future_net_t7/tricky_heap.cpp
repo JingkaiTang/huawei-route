@@ -1,76 +1,77 @@
 #include "tricky_heap.h"
 
-TrickyHeap::TrickyHeap(): size(0), fa(100) {
-}
-
-TrickyHeap::~TrickyHeap() {
+TrickyHeap::TrickyHeap(int mbd, int ses): MAX_BOUND(-1^(1<<(sizeof(int)*8-1))), size(0), min_bound_distance(mbd), slot_extend_step(ses) {
+  slots = NULL;
 }
 
 RouteCursor &TrickyHeap::pop() {
-  fa[0] = fa[1];
-  fa[1] = fa[size];
-  int cur_index = 1;
-  int pre_index = size;
-  size --;
-  while (cur_index != pre_index) {
-    pre_index = cur_index;
-    cur_index = spin_down(cur_index);
+  int target = size%slots->size;
+  top_cursor = slots->fa[target];
+  slots->size --;
+  if (slots->size == 0) {
+    slots = remove(slots);
+  } else {
+    slots->fa[target] = slots->fa[slots->size];
   }
-  return fa[0];
+  size --;
+  return top_cursor;
 }
 
 RouteCursor &TrickyHeap::get() {
-  if (size+2 < fa.capacity) {
-    size ++;
-    return fa[size];
-  } else {
-    fa.extend();
-    return get();
-  }
+  return new_cursor;
 }
 
 void TrickyHeap::balance() {
-  int cur_index = size;
-  int pre_index = 1;
-  while (cur_index != pre_index) {
-    pre_index = cur_index;
-    cur_index = spin_up(cur_index);
+  if (slots == NULL) {
+    slots = divide(NULL);
   }
+  HeapSlot *slot = slots;
+  while (new_cursor.value > slot->bound) {
+    slot = slot->next;
+  }
+  if (slot->size >= slot->capacity) {
+    divide(slot);
+    return balance();
+  }
+  slot->fa[size] = new_cursor;
+  slot->size ++;
+  size ++;
 }
 
-int TrickyHeap::spin_up(int index) {
-  int parent = index / 2;
-  if (parent < 1) {
-    return index;
+HeapSlot *TrickyHeap::divide(HeapSlot *slot) {
+  if (slot == NULL) {
+    slot = new HeapSlot(MAX_BOUND, slot_extend_step);
+    slot->next = NULL;
+    return slot;
   }
-  if (fa[index] < fa[parent]) {
-    fa[size+1] = fa[index];
-    fa[index] = fa[parent];
-    fa[parent] = fa[size+1];
-    return parent;
+  int next_bound = MAX_BOUND;
+  int this_bound = slot->bound;
+  if (slot->next != NULL) {
+    if (slot->next->next != NULL) {
+      if (slot->next->bound - slot->bound < min_bound_distance) {
+        return slot;
+      } else {
+        next_bound = (slot->bound + slot->next->bound) / 2;
+      }
+    } else {
+      next_bound = slot->bound * 2;
+    }
+  } else {
+    this_bound = min_bound_distance;
   }
-  return index;
+  HeapSlot *next = new HeapSlot(next_bound, slot_extend_step);
+  next->next = slot->next->next;
+  slot->next = next;
+  slot->bound = this_bound;
+  slot->extend();
+  return next;
 }
 
-int TrickyHeap::spin_down(int index) {
-  int left = 2 * index;
-
-  if (left > size) {
-    return index;
+HeapSlot *TrickyHeap::remove(HeapSlot *slot) {
+  if (slot == NULL) {
+    return NULL;
   }
-
-  int min = left;
-  if (left < size) {
-    int right = left + 1;
-    min = fa[left] < fa[right] ? left : right;
-  }
-
-  if (fa[min] < fa[index]) {
-    fa[size+1] = fa[index];
-    fa[index] = fa[min];
-    fa[min] = fa[size+1];
-    return min;
-  }
-
-  return index;
+  HeapSlot *next = slot->next;
+  delete slot;
+  return next;
 }

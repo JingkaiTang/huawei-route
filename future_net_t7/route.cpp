@@ -50,7 +50,7 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
   while (explorer.size > 0) {
     LOG("Begin to extend a new node:\n");
     RouteCursor &cursor = explorer.pop();
-    LOG("Push to Explorer: size=>%d\n", explorer.size);
+    LOG("Pop from Explorer: size=>%d\n", explorer.size);
     HEAP_SHOW(&explorer);
     CURSOR_SHOW(&cursor);
 
