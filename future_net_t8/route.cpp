@@ -10,6 +10,7 @@ DemandSet *demand = NULL;
 int *path = NULL;
 int path_size = 0;
 Bitmap *path_bitmap = NULL;
+Bitmap *bad_nodes = NULL;
 
 
 bool search(int pass_count, int node) {
@@ -22,23 +23,35 @@ bool search(int pass_count, int node) {
     return true;
   }
 
-  TopoNode *cur_node = &topo[node];
-  TopoArrow *cur_arrow;
-  for (int i = 0; i < cur_node->out_degree; i++) {
-    cur_arrow = &cur_node->arrows[i];
+  if (!bad_nodes->test(node)) {
+    TopoNode *cur_node = &topo[node];
 
-    if (path_bitmap->test(cur_arrow->target)) {
-      continue;
+    if (cur_node->out_degree == 0) {
+      if (demand->bitmap->test(node)) {
+        path_size = 0;
+        return true;
+      }
+      bad_nodes->set(node);
+    } else {
+
+      TopoArrow *cur_arrow;
+      for (int i = 0; i < cur_node->out_degree; i++) {
+        cur_arrow = &cur_node->arrows[i];
+
+        if (path_bitmap->test(cur_arrow->target)) {
+          continue;
+        }
+
+        path[path_size] = cur_arrow->number;
+        path_size++;
+
+        if (search(pass_count, cur_arrow->target)) {
+          return true;
+        }
+
+        path_size--;
+      }
     }
-
-    path[path_size] = cur_arrow->number;
-    path_size++;
-
-    if (search(pass_count, cur_arrow->target)) {
-      return true;
-    }
-
-    path_size--;
   }
 
   path_bitmap->unset(node);
@@ -51,6 +64,7 @@ void search_route(TopoNode *t, int node_scope, DemandSet *d) {
   path = new int[node_scope];
   path_size = 0;
   path_bitmap = new Bitmap(node_scope);
+  bad_nodes = new Bitmap(node_scope);
 
   LOG("DEMAND => ");
   BITMAP_SHOW(demand->bitmap);
@@ -61,4 +75,7 @@ void search_route(TopoNode *t, int node_scope, DemandSet *d) {
     record_result(path[i]);
   }
 
+  delete[] path;
+  delete path_bitmap;
+  delete bad_nodes;
 }
