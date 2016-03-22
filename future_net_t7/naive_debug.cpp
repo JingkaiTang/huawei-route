@@ -10,8 +10,8 @@ void heap_show(TrickyHeap *heap) {
     for (int i = 0; i < slot->size; i ++) {
       printf("[%d] => ", index);
       CURSOR_SHOW(&slot->fa[i]);
+      index ++;
     }
-    index ++;
     slot = slot->next;
   }
   printf("<=== Heap\n");

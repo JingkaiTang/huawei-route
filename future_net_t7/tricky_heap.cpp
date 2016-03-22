@@ -33,7 +33,7 @@ void TrickyHeap::balance() {
     divide(slot);
     return balance();
   }
-  slot->fa[size] = new_cursor;
+  slot->fa[slot->size] = new_cursor;
   slot->size ++;
   size ++;
 }
@@ -46,9 +46,11 @@ HeapSlot *TrickyHeap::divide(HeapSlot *slot) {
   }
   int next_bound = MAX_BOUND;
   int this_bound = slot->bound;
+  HeapSlot* slot_next_next = NULL;
   if (slot->next != NULL) {
     if (slot->next->next != NULL) {
       if (slot->next->bound - slot->bound < min_bound_distance) {
+        slot->extend();
         return slot;
       } else {
         next_bound = (slot->bound + slot->next->bound) / 2;
@@ -56,15 +58,16 @@ HeapSlot *TrickyHeap::divide(HeapSlot *slot) {
     } else {
       next_bound = slot->bound * 2;
     }
+    slot_next_next = slot->next->next;
   } else {
     this_bound = min_bound_distance;
   }
-  HeapSlot *next = new HeapSlot(next_bound, slot_extend_step);
-  next->next = slot->next->next;
-  slot->next = next;
+  HeapSlot *next_slot = new HeapSlot(next_bound, slot_extend_step);
+  next_slot->next = slot_next_next;
+  slot->next = next_slot;
   slot->bound = this_bound;
   slot->extend();
-  return next;
+  return next_slot;
 }
 
 HeapSlot *TrickyHeap::remove(HeapSlot *slot) {
