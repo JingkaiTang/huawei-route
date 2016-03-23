@@ -58,6 +58,7 @@ void search_route(TopoNode *t, int n, DemandSet *d) {
 
   LOG("ROUTE SEARCH START ...\n");
   search_node(0, demand->start);
+  LOG("ROUTE SEARCH END ...\n");
 
   for (int i = 0; i < path_size; i++) {
     record_result(path[i].arrow->number);
@@ -101,25 +102,7 @@ int search_node(int pass_count, int node) {
   LOG("SEARCH NODE %d\n", node);
   int ret = BASE_STATE;
 
-  bool is_visted = visited->test(node);
-
-  path_bitmap->set(node);
-  visited->set(node);
-  if (demand->bitmap->test(node)) {
-    pass_count++;
-  }
-
-  if (pass_count == demand->pass_size && node == demand->end) {
-    LOG("PATH FOUND!!!\n");
-    return FOUND;
-  }
-
-  if (node == demand->end) {
-    path_bitmap->unset(node);
-    return GOOD_NODE;
-  }
-
-  if (is_visted) {
+  if (visited->test(node)) {
     // good node
     if (good[node] != NULL) {
       ret |= search_good_node(pass_count, node);
@@ -137,9 +120,28 @@ int search_node(int pass_count, int node) {
     return ret;
   }
 
+  visited->set(node);
+
+  path_bitmap->set(node);
+  if (demand->bitmap->test(node)) {
+    pass_count++;
+  }
+
+  if (pass_count == demand->pass_size && node == demand->end) {
+    LOG("PATH FOUND!!!\n");
+    return FOUND;
+  }
+
+  if (node == demand->end) {
+    path_bitmap->unset(node);
+    return GOOD_NODE;
+  }
+
   TopoNode *cur_node = &topo[node];
   TopoArrow *cur_arrow;
+  bool is_bad_node = true;
   for (int i = 0; i < cur_node->out_degree; i++) {
+    LOG("BEGIN TO EXTEND EDGE[%d]\n", i);
     cur_arrow = &cur_node->arrows[i];
 
     int flag = search_edge(pass_count, node, cur_arrow);
@@ -148,18 +150,18 @@ int search_node(int pass_count, int node) {
       return FOUND;
     }
 
-    if (flag & BAD_NODE) {
-      if (i < cur_node->out_degree - 1) {
-        cur_arrow[i] = cur_arrow[cur_node->out_degree - 1];
-        i--;
-      }
-      cur_node->out_degree--;
+    if (!(flag & BAD_NODE)) {
+      flag &= BAD_NODE ^ -1;
+      is_bad_node = false;
     }
+
+    ret |= flag;
   }
 
   path_bitmap->unset(node);
 
-  if (cur_node->out_degree == 0 && node != demand->end) {
+  if (is_bad_node) {
+    LOG("BAD NODE %d FOUND!!!\n", node);
     if (demand->bitmap->test(node)) {
       path_size = 0;
       return FOUND;
@@ -171,18 +173,24 @@ int search_node(int pass_count, int node) {
 }
 
 int search_edge(int pass_count, int node, TopoArrow *arrow) {
+  LOG("SEACHING EDGE:\n");
+  ARROW_SHOW(arrow);
   // dangling target node check
   if (path_bitmap->test(arrow->target)) {
+    LOG("DANGLING EDGE FOUND!!!\n");
     add_dangling_edge(node, arrow);
+    TOPO_SHOW(dangling, node_scope);
     return DANGLING_NODE;
   }
 
   int ret = BASE_STATE;
 
   // push edge to path
+  LOG("ADD node %d to path\n", node);
   path[path_size].from = node;
   path[path_size].arrow = arrow;
   path_size++;
+  EDGE_ARRAY_SHOW(path, path_size);
 
   int flag = search_node(pass_count, arrow->target);
 
@@ -191,7 +199,9 @@ int search_edge(int pass_count, int node, TopoArrow *arrow) {
   }
 
   if (flag & GOOD_NODE) {
+    LOG("ADDING GOOD NODE ...\n");
     add_good_edge(node, arrow);
+    PATH_LIST_SHOW(good, node_scope);
   }
 
   ret |= flag;
@@ -228,11 +238,56 @@ void add_good_edge(int node, TopoArrow *arrow) {
 }
 
 int search_good_node(int pass_count, int node) {
-  int ret = BASE_STATE;
+  LOG("SEARCH GOOD NODE %d\n", node);
+  int ret = GOOD_NODE;
+  Path *good_path = good[node];
+  while (good_path != NULL) {
+    if (!path_bitmap->conflict(good_path->bitmap) && pass_count+good_path->pass_count==demand->pass_size) {
+      LOG("ROUTE FOUND IN GOOD NODES!!!\n");
+      memcpy(&path[path_size], good_path->path, sizeof(Edge)*good_path->size);
+      path_size += good_path->size;
+      return FOUND;
+    }
+    good_path = good_path->next;
+  }
   return ret;
 }
 
 int search_dangling_node(int pass_count, int node) {
   int ret = BASE_STATE;
+
+  if (path_bitmap->test(node)) {
+    return ret;
+  }
+
+  path_bitmap->set(node);
+  if (demand->bitmap->test(node)) {
+    pass_count ++;
+  }
+  TopoNode *cur_node = &dangling[node];
+  TopoArrow *cur_arrow;
+  for (int i = 0; i < cur_node->out_degree; i++) {
+    cur_arrow = &cur_node->arrows[i];
+    path[path_size].from = node;
+    path[path_size].arrow = cur_arrow;
+    path_size ++;
+
+    if (good[cur_arrow->target] != NULL) {
+      ret |= search_good_node(pass_count, cur_arrow->target);
+
+      if (ret & FOUND) {
+        return FOUND;
+      }
+    }
+
+    ret |= search_dangling_node(pass_count, cur_arrow->target);
+
+    if (ret & FOUND) {
+      return FOUND;
+    }
+
+    path_size --;
+  }
+  path_bitmap->unset(node);
   return ret;
 }

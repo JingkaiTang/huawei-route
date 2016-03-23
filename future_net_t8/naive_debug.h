@@ -7,8 +7,44 @@
 #include "data.h"
 #include "bitmap.h"
 #include "tricky_heap.h"
+#include "path.h"
 
 #include <stdio.h>
+
+#ifdef __DEBUG__
+void path_list_show(Path **path_list, int size);
+#define PATH_LIST_SHOW(path_list, size) path_list_show(path_list, size)
+#else
+#define PATH_LIST_SHOW(path_list, size)
+#endif
+
+#ifdef __DEBUG__
+void path_show(Path *path);
+#define PATH_SHOW(path) path_show(path)
+#else
+#define PATH_SHOW(path)
+#endif
+
+#ifdef __DEBUG__
+void edge_show(Edge *edge);
+#define EDGE_SHOW(edge) edge_show(edge)
+#else
+#define EDGE_SHOW(edge)
+#endif
+
+#ifdef __DEBUG__
+void edge_array_show(Edge *edges, int size);
+#define EDGE_ARRAY_SHOW(edge, size) edge_array_show(edge, size)
+#else
+#define EDGE_ARRAY_SHOW(edge, size)
+#endif
+
+#ifdef __DEBUG__
+void arrow_show(TopoArrow *arrow);
+#define ARROW_SHOW(arrow) arrow_show(arrow)
+#else
+#define ARROW_SHOW(arrow)
+#endif
 
 #ifdef __DEBUG__
 void heap_show(TrickyHeap *heap);
@@ -25,9 +61,9 @@ void bitmap_show(Bitmap *bitmap);
 #endif
 
 #ifdef __DEBUG__
-#define LOG(fmt, args...) printf(fmt, ##args)
+#define LOG(args...) printf(args)
 #else
-#define LOG(fmt, args...)
+#define LOG(args...)
 #endif
 
 #ifdef __DEBUG__
