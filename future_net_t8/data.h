@@ -9,6 +9,11 @@ struct TopoArrow {
   int cost;
 };
 
+struct Edge {
+  int from;
+  TopoArrow *arrow;
+};
+
 struct TopoNode {
   int out_degree;
   TopoArrow arrows[8];
