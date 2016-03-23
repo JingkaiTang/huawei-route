@@ -13,6 +13,10 @@ public:
   void set(int location);
   void unset(int location);
   bool test(int location);
+  bool conflict(Bitmap *bitmap);
+  bool contain(Bitmap *bitmap);
+  static Bitmap *_and(Bitmap *bm1, Bitmap *bm2);
+  static Bitmap *_or(Bitmap *bm1, Bitmap *bm2);
 };
 
 #endif
