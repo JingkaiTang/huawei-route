@@ -21,6 +21,7 @@ void _path_show(Path *path) {
     _edge_show(path->path);
     printf("}\n");
     path = path->next;
+    i ++;
   }
   printf("<== Path\n");
 }
@@ -28,6 +29,9 @@ void _path_show(Path *path) {
 void path_list_show(Path **path_list, int size) {
   printf("Path List ===>\n");
   for (int i = 0; i < size; i ++) {
+    if (path_list[i] == NULL) {
+      continue;
+    }
     printf("[%d]: ", i);
     _path_show(path_list[i]);
   }
@@ -55,7 +59,9 @@ void edge_show(Edge *edge) {
 }
 
 void _arrow_show(TopoArrow *arrow) {
-  printf("Arrow => {target: %d, number: %d, cost: %d}", arrow->target, arrow->number, arrow->cost);
+  if (arrow != NULL) {
+    printf("Arrow => {target: %d, number: %d, cost: %d}", arrow->target, arrow->number, arrow->cost);
+  }
 }
 
 void arrow_show(TopoArrow *arrow) {

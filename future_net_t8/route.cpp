@@ -47,7 +47,7 @@ void search_route(TopoNode *t, int n, DemandSet *d) {
   Path *end = new Path();
   end->size = 0;
   end->pass_count = 0;
-  end->path = new Edge[0];
+  end->path = new Edge[1]();
   end->bitmap = new Bitmap(node_scope);
   end->bitmap->set(demand->end);
   end->next = NULL;
@@ -144,20 +144,18 @@ int search_node(int pass_count, int node) {
     LOG("BEGIN TO EXTEND EDGE[%d]\n", i);
     cur_arrow = &cur_node->arrows[i];
 
-    int flag = search_edge(pass_count, node, cur_arrow);
+    ret |= search_edge(pass_count, node, cur_arrow);
 
-    if (flag & FOUND) {
+    if (ret & FOUND) {
       return FOUND;
     }
 
-    if (!(flag & BAD_NODE)) {
-      flag &= BAD_NODE ^ -1;
+    if (!(ret & BAD_NODE)) {
       is_bad_node = false;
     }
-
-    ret |= flag;
   }
 
+  ret &= BAD_NODE ^ -1;
   path_bitmap->unset(node);
 
   if (is_bad_node) {
@@ -192,22 +190,22 @@ int search_edge(int pass_count, int node, TopoArrow *arrow) {
   path_size++;
   EDGE_ARRAY_SHOW(path, path_size);
 
-  int flag = search_node(pass_count, arrow->target);
+  ret |= search_node(pass_count, arrow->target);
 
-  if (flag & FOUND) {
+  if (ret & FOUND) {
     return FOUND;
   }
 
-  if (flag & GOOD_NODE) {
+  if (ret & GOOD_NODE) {
     LOG("ADDING GOOD NODE ...\n");
     add_good_edge(node, arrow);
     PATH_LIST_SHOW(good, node_scope);
   }
 
-  ret |= flag;
-
   // remove edge from path
+  LOG("REMOVE node %d from path\n", node);
   path_size--;
+  EDGE_ARRAY_SHOW(path, path_size);
   return ret;
 }
 
