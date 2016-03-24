@@ -110,7 +110,7 @@ void cursor_show(RouteCursor *cursor) {
 
 void topo_show(TopoNode *topo, int topo_size) {
   printf("%s\n", "Topo Details:");
-  for (int i = 0; i <= topo_size; i ++) {
+  for (int i = 0; i < topo_size; i ++) {
     if (topo[i].out_degree == 0) {
       continue;
     }

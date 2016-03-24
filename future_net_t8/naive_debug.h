@@ -1,7 +1,7 @@
 #ifndef __NAIVE_DEBUG_H__
 #define __NAIVE_DEBUG_H__
 
-#define __DEBUG__
+//#define __DEBUG__
 
 #include "route_cursor.h"
 #include "data.h"
