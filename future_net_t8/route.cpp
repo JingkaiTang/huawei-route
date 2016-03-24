@@ -150,12 +150,11 @@ int search_node(int pass_count, int node) {
       return FOUND;
     }
 
-    if (!(ret & BAD_NODE)) {
+    if (ret & (BAD_NODE ^ -1)) {
       is_bad_node = false;
     }
   }
 
-  ret &= BAD_NODE ^ -1;
   path_bitmap->unset(node);
 
   if (is_bad_node) {
@@ -166,6 +165,8 @@ int search_node(int pass_count, int node) {
     }
     return BAD_NODE;
   }
+
+  ret &= BAD_NODE ^ -1;
 
   return ret;
 }
@@ -221,6 +222,7 @@ void add_good_edge(int node, TopoArrow *arrow) {
   while (next_path != NULL) {
     good_path = new Path();
     good_path->size = next_path->size + 1;
+    good_path->pass_count = next_path->pass_count;
     if (demand->bitmap->test(node)) {
       good_path->pass_count ++;
     }
@@ -237,7 +239,6 @@ void add_good_edge(int node, TopoArrow *arrow) {
 
 int search_good_node(int pass_count, int node) {
   LOG("SEARCH GOOD NODE %d\n", node);
-  int ret = GOOD_NODE;
   Path *good_path = good[node];
   while (good_path != NULL) {
     if (!path_bitmap->conflict(good_path->bitmap) && pass_count+good_path->pass_count==demand->pass_size) {
@@ -248,7 +249,7 @@ int search_good_node(int pass_count, int node) {
     }
     good_path = good_path->next;
   }
-  return ret;
+  return GOOD_NODE;
 }
 
 int search_dangling_node(int pass_count, int node) {
