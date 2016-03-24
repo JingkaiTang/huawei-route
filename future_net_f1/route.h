@@ -5,4 +5,6 @@
 
 void search_route(TopoNode *topo, int node_scope, DemandSet *demand);
 
+void print_path(Ant *ant);
+
 #endif

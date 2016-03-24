@@ -2,10 +2,6 @@
 #define __DATA_H__
 
 #include "bitmap.h"
-#include <stack>
-
-using namespace std;
-
 
 struct TopoArrow {
   int target;
@@ -34,6 +30,7 @@ struct TopoEdge {
 
 struct Ant {
   int path_size;
+  int start_node;
   int cur_node;
   int *bitmap;
   int cost;
