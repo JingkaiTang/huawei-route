@@ -120,7 +120,6 @@ int search_node(int pass_count, int node) {
     return ret;
   }
 
-  visited->set(node);
 
   path_bitmap->set(node);
   if (demand->bitmap->test(node)) {
@@ -134,6 +133,7 @@ int search_node(int pass_count, int node) {
 
   if (node == demand->end) {
     path_bitmap->unset(node);
+    visited->set(node);
     return GOOD_NODE;
   }
 
@@ -156,6 +156,7 @@ int search_node(int pass_count, int node) {
   }
 
   path_bitmap->unset(node);
+  visited->set(node);
 
   if (is_bad_node) {
     LOG("BAD NODE %d FOUND!!!\n", node);
