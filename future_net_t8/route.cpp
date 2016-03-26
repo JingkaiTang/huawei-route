@@ -183,6 +183,10 @@ int search_edge(int pass_count, int node, TopoArrow *arrow) {
     return DANGLING_NODE;
   }
 
+  if (dangling[arrow->target].out_degree > 0) {
+    _add_dangling_edge(node, arrow);
+  }
+
   int ret = BASE_STATE;
 
   // push edge to path

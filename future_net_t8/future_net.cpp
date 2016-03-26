@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 
     TopoNode topo[600];
     int topo_max_index = topo_parse(topo, 600, topo_lines, edge_num);
-    TOPO_SHOW(topo, topo_max_index);
+    TOPO_SHOW(topo, topo_max_index+1);
 
     DemandSet *demand = demand_parse(demand_line);
     DEMAND_SHOW(demand);
