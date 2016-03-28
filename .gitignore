@@ -5,3 +5,4 @@ build/
 result.csv
 future_net.tar.gz
 .idea/
+/log.txt

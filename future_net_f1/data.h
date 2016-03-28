@@ -34,6 +34,7 @@ struct Ant {
   int cur_node;
   int *bitmap;
   int cost;
+  int flag;
   TopoArrow* path;
 };
 #endif

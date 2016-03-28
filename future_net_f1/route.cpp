@@ -12,14 +12,15 @@
 
 using namespace std;
 
-#define ALPHA 0.4       //The importance of pheromone
-#define BETA 0.6        //The importance of heuristic information(cost of edge)
+#define ALPHA 0.9       //The importance of pheromone
+#define BETA 1        //The importance of heuristic information(cost of edge)
 #define RHO 0.3         //The decrease of pheromone after every iteration
-#define QSUM 10.0         //The amount of pheromone
+#define QSUM 10.0       //The amount of pheromone
+#define MULT 2          //The multiple of probability for node in set V'
 //#define GAMMA 20
 #define BESTCOST 60000
-#define GEN 1           //Iteration times
-#define MAX 101 
+#define GEN 100            //Iteration times
+#define MAX 101         //Random Max
 
 void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
   LOG("DEMAND => ");
@@ -31,11 +32,14 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
   }
   
   float pheromone[node_scope][node_scope];
-  for(int i=0;i<node_scope;i++)
-    for(int j=0;j<node_scope;j++)
+  for(int i=0;i<node_scope;i++){
+    for(int j=0;j<node_scope;j++){
       pheromone[i][j]=0.1f;
+    }
+  }
+
   int bestCost = BESTCOST;
-  Ant *bestAnt;
+  Ant *bestAnt = NULL;
     
   Ant *ants[demand->pass_size];
   for(int g=0;g<GEN;g++){
@@ -43,20 +47,21 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
       
       LOG("No.%d ant.\n",i);
       ants[i] =  new Ant();
-      //ants[i]->path.push(&topo[demand->pass[i]]);
-      //ants[i]->path_size ++;
       ants[i]->cur_node = demand->pass[i];
       ants[i]->start_node = demand->pass[i];
       ants[i]->bitmap = new int[node_scope]{0};
-
-      ants[i]->bitmap[demand->pass[i]] = 1;
       ants[i]->path = new TopoArrow[node_scope];
       ants[i]->path_size = 0;
       ants[i]->cost = 0;
 
-      LOG("CURRENT=>%d\n",ants[i]->cur_node);
+      //initial v' node
+      for(int y=0;y<demand->pass_size;y++){
+        ants[i]->bitmap[demand->pass[y]] = 2;
+      }
+      ants[i]->bitmap[demand->pass[i]] = 1;
 
-      while(true){
+
+      while(true){//for(int z=0;z<5;z++){//
         if(ants[i]->cur_node == demand->end){
           if(ants[i]->bitmap[demand->start] == 1){
             break;
@@ -69,8 +74,8 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
           ants[i]->cur_node = demand->start;
           ants[i]->bitmap[demand->start] = 1;
           ants[i]->path_size ++;
-          LOG("CUR=>%d\n",demand->start);
         }
+        LOG("CUR=>%d\n",ants[i]->cur_node);
 
         TopoNode *tn = &topo[ants[i]->cur_node];
         double p[tn->out_degree];
@@ -80,39 +85,58 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
         int count = 0;
         int lastnode = -1;
         for(int j=0;j<tn->out_degree;j++){
-          LOG("TEMP=%d ",tn->arrows[j].target);
-          if(tn->arrows[j].target==ants[i]->start_node){
+          LOG("TARGET=%d ",tn->arrows[j].target);
+          int target = tn->arrows[j].target;
+          if(target == ants[i]->start_node){
             lastnode = j;
           }
-          if(ants[i]->bitmap[tn->arrows[j].target]==1){
+          int exist = ants[i]->bitmap[target];
+          if(exist == 1){
             p[j]=0.0;
             count++;
             LOG(" p=0.0\n");
             continue;
           }
-          p[j] = pow(pheromone[ants[i]->cur_node][tn->arrows[j].target], ALPHA)
-                *pow(1/tn->arrows[j].cost, BETA);
-          LOG(" p=%f\n",p[j]);
+          //LOG("%f ",pow(1.0/tn->arrows[j].cost, BETA));
+            p[j] = pow(pheromone[ants[i]->cur_node][tn->arrows[j].target], ALPHA)
+                *pow(1.0/tn->arrows[j].cost, BETA);
+          
+            LOG(" p=%f\n",p[j]);
           sum += p[j];
         }
         //no reachable node
         if(count == tn->out_degree){
+          ants[i]->flag = 0;
           if(lastnode>0){
-            LOG("find..\n");
+            int res=1;
+            for(int y=0;y<demand->pass_size;y++){
+              if(ants[i]->bitmap[demand->pass[y]] == 2){
+                res=0;
+                break;
+              }
+            }
+            if(res==0){
+              break;
+            }
+            //printf("find..\n");
+            ants[i]->flag = 1;
             ants[i]->path[ants[i]->path_size] =tn->arrows[lastnode];
             ants[i]->path_size ++;
             ants[i]->cost += tn->arrows[lastnode].cost;
+            if(bestCost>ants[i]->cost){
+              bestCost = ants[i]->cost;
+              bestAnt = ants[i];
+              LOG("end.......bestCost=%d\n",bestCost);
+            }
           }
-          if(bestCost>ants[i]->cost){
-            bestCost = ants[i]->cost;
-            bestAnt = ants[i];
-            LOG("end.......bestCost=%d\n",bestCost);
-          }
+          //printf("%d.\n",i);
+          //print_path(ants[i]);
+
           break;
         }
         for(int j=0;j<tn->out_degree;j++){
           p[j] /= sum;
-          //LOG("P[%d]=%f\n",j,p[j]);
+          LOG("P[%d]=%f\n",j,p[j]);
         }
 
         int random_i = rand()%MAX;
@@ -122,7 +146,7 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
         for(int j=0;j<tn->out_degree;j++){
           ransum +=p[j];
           LOG("TARGET=%d,EXIST=%d\n",tn->arrows[j].target,ants[i]->bitmap[tn->arrows[j].target]==0);
-          if(ransum >= random||ants[i]->bitmap[tn->arrows[j].target]==0){
+          if(ransum >= random&&ants[i]->bitmap[tn->arrows[j].target]!= 1){
             selectNum = j;
             break;
           }
@@ -132,7 +156,6 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
         LOG("SELECT=%d\n",selectNode);
 
         if(selectNode == demand->pass[i]){
-          //find
           LOG("Find!!!\n");
           //if(bestCost>ants[i]->cost){
             bestCost = ants[i]->cost;
@@ -146,7 +169,7 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
           //}
           break;
         }
-        if(ants[i]->bitmap[selectNode]==0){
+        if(ants[i]->bitmap[selectNode] != 1){
           ants[i]->bitmap[selectNode] = 1;
           ants[i]->cur_node = selectNode;
           ants[i]->path[ants[i]->path_size] =tn->arrows[selectNum];
@@ -165,12 +188,20 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
           int from = ants[i]->start_node;
           int to;
           int cost = ants[i]->cost;
-
-          for(int p=0;p<ants[i]->path_size;p++){
-            to = ants[i]->path[p].target;
-            pheromone[from][to] += QSUM/ants[i]->path[p].cost;
-            from = to;
+          if(ants[i]->flag == 0){
+            for(int p=0;p<ants[i]->path_size;p++){
+              to = ants[i]->path[p].target;
+              pheromone[from][to] += QSUM/ants[i]->path[p].cost;
+              from = to;
+            }
+          }else{
+            for(int p=0;p<ants[i]->path_size;p++){
+              to = ants[i]->path[p].target;
+              pheromone[from][to] += 2.0*QSUM/ants[i]->path[p].cost;
+              from = to;
+            }
           }
+
         }
       }
     }
@@ -182,23 +213,33 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
 }
 
 void print_path(Ant *ant) {
+  if(NULL == ant){
+    LOG("null point\n");
+    return;
+  }
   int pathtemp[ant->path_size];
   int flag=-1;
   /*
+
   for(int i=0;i<ant->path_size;i++){
     printf("%d ",ant->path[i].number);
   }
   printf("\n");
+  printf("%d ",ant->start_node);
+  for(int i=0;i<ant->path_size;i++){
+    printf("%d ",ant->path[i].target);
+  }
+  printf("\n");
   */
+
   for(int i=0;i<ant->path_size;i++){
     if(ant->path[i].cost == 0){
       flag=i;
       continue;
-      //record_result(ant->path[i].number);
     }
     if(flag>-1){
-      printf("%d ",ant->path[i].number);
-
+      //printf("%d ",ant->path[i].number);
+      record_result(ant->path[i].number);
     }
     else{
       pathtemp[i]=ant->path[i].number;
@@ -206,7 +247,7 @@ void print_path(Ant *ant) {
   }
   if(flag>0){
     for(int i=0;i<flag;i++){
-      printf("%d ",ant->path[i].number);
+      //printf("%d ",ant->path[i].number);
       record_result(ant->path[i].number);
     }
   }
