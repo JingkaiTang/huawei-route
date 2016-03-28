@@ -189,11 +189,13 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
           int to;
           int cost = ants[i]->cost;
           if(ants[i]->flag == 0){
+            /*
             for(int p=0;p<ants[i]->path_size;p++){
               to = ants[i]->path[p].target;
               pheromone[from][to] += QSUM/ants[i]->path[p].cost;
               from = to;
             }
+            */
           }else{
             for(int p=0;p<ants[i]->path_size;p++){
               to = ants[i]->path[p].target;
