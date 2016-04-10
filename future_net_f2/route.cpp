@@ -12,8 +12,8 @@
 
 using namespace std;
 
-#define ALPHA 0.9       //The importance of pheromone
-#define BETA 1          //The importance of heuristic information(cost of edge)
+#define ALPHA 0.5       //The importance of pheromone
+#define BETA 1.5        //The importance of heuristic information(cost of edge)
 #define RHO 0.3         //The decrease of pheromone after every iteration
 #define QSUM 10.0       //The amount of pheromone
 #define MULT 2          //The multiple of probability for node in set V'
@@ -45,7 +45,6 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
   for(int g=0;g<GEN;g++){
     for(int i=0;i<demand->pass_size;i++){
       
-      LOG("No.%d ant.\n",i);
       ants[i] =  new Ant();
       ants[i]->cur_node = demand->pass[i];
       ants[i]->start_node = demand->pass[i];
@@ -60,8 +59,8 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
       }
       ants[i]->bitmap[demand->pass[i]] = 1;
 
-
       while(true){//for(int z=0;z<5;z++){//
+
         if(ants[i]->cur_node == demand->end){
           if(ants[i]->bitmap[demand->start] == 1){
             break;
@@ -129,9 +128,11 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
               LOG("end.......bestCost=%d\n",bestCost);
             }
           }
-          //printf("%d.\n",i);
           //print_path(ants[i]);
 
+          break;
+        }
+        if(sum == 0.0){
           break;
         }
         for(int j=0;j<tn->out_degree;j++){
@@ -159,6 +160,7 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
           LOG("Find!!!\n");
           //if(bestCost>ants[i]->cost){
             bestCost = ants[i]->cost;
+            ants[i]->flag = 1;
             bestAnt = ants[i];
             //print_path(ants[i]);
             LOG("path_size=%d\n",ants[i]->path_size);
@@ -179,7 +181,6 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
         }
       }
     }
-    LOG("Iteration\n");
     //update pheromone
     for(int i=0;i<demand->pass_size;i++){
       for(int m=0;m<node_scope;m++){
@@ -192,14 +193,15 @@ void search_route(TopoNode *topo, int node_scope, DemandSet *demand) {
             /*
             for(int p=0;p<ants[i]->path_size;p++){
               to = ants[i]->path[p].target;
-              pheromone[from][to] += QSUM/ants[i]->path[p].cost;
+              pheromone[from][to] -= QSUM/ants[i]->path[p].cost/10.0;
+              if(pheromone[from][to]<0) pheromone[from][to]=0;
               from = to;
             }
             */
           }else{
             for(int p=0;p<ants[i]->path_size;p++){
               to = ants[i]->path[p].target;
-              pheromone[from][to] += 2.0*QSUM/ants[i]->path[p].cost;
+              pheromone[from][to] += QSUM/ants[i]->path[p].cost;
               from = to;
             }
           }
@@ -219,6 +221,7 @@ void print_path(Ant *ant) {
     LOG("null point\n");
     return;
   }
+  printf("0000000000000000000000000000000000000\n");
   int pathtemp[ant->path_size];
   int flag=-1;
   /*
